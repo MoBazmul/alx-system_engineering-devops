@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 """
-A Script that, uses this REST API, for a given employee ID, returns
+A Script that, uses a REST API, for a given employee ID, returns
 information about his/her TODO list progress
+exporting data in the CSV format.
 """
 
 import sys
+import csv
 import requests
+
 
 if __name__ == '__main__':
     # URL to the to dos API
@@ -21,17 +24,13 @@ if __name__ == '__main__':
     # Getting the username
     username = requests.get(user_url).json()['name']
     
-    no_of_tasks = len(obj)
-    completed_tasks = []
+    csv_file_name = sys.argv[1] + '.csv'
     
-    for o in obj:
-        if o['completed'] == True:
-            completed_tasks.append(o['title'])
-            
-    print(f"Employee {username} is done with tasks({len(completed_tasks)}/{no_of_tasks}):")
-    
-    for task in completed_tasks:
-        print(f"\t{task}")
+    with open(csv_file_name, 'a') as file:
+        writer = csv.writer(file)
+        
+        for o in obj:
+            writer.writerow([str(sys.argv[1]), username, o['completed'], o['title']])
 
 
 
