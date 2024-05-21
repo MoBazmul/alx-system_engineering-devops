@@ -5,33 +5,35 @@ information about his/her TODO list progress
 exporting data in the CSV format.
 """
 
-import sys
 import csv
+import json
 import requests
+from sys import argv
 
 
-if __name__ == '__main__':
-    # URL to the to dos API
-    url = "https://jsonplaceholder.typicode.com/todos"
-    user_url = "https://jsonplaceholder.typicode.com/users"
-    
-    # Concatenating the URL with specific user ID
-    url = url + '?userId=' + sys.argv[1]
-    user_url = user_url + '/' + sys.argv[1]
-    
-    obj = requests.get(url).json()
-    
-    # Getting the username
-    username = requests.get(user_url).json()['name']
-    
-    csv_file_name = sys.argv[1] + '.csv'
-    
-    with open(csv_file_name, 'a') as file:
-        writer = csv.writer(file)
-        
-        for o in obj:
-            writer.writerow([str(sys.argv[1]), username, o['completed'], o['title']])
+if __name__ == "__main__":
 
+    sessionReq = requests.Session()
 
+    idEmp = argv[1]
+    idURL = 'https://jsonplaceholder.typicode.com/users/{}/todos'.format(idEmp)
+    nameURL = 'https://jsonplaceholder.typicode.com/users/{}'.format(idEmp)
 
+    employee = sessionReq.get(idURL)
+    employeeName = sessionReq.get(nameURL)
 
+    json_req = employee.json()
+    usr = employeeName.json()['username']
+
+    totalTasks = 0
+
+    for done_tasks in json_req:
+        if done_tasks['completed']:
+            totalTasks += 1
+
+    fileCSV = idEmp + '.csv'
+
+    with open(fileCSV, "w", newline='') as csvfile:
+        write = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_ALL)
+        for i in json_req:
+            write.writerow([idEmp, usr, i.get('completed'), i.get('title')])
